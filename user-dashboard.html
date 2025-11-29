@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Dashboard - DairyShop</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+
+<body>
+<div class="website-container">
+
+  <!-- Sidebar -->
+  <div class="page-handler">
+    <div class="shopname">
+      <img src="./images/dairy.webp" alt="logo" class="shoplogo" />
+      <h3>DairyShop</h3>
+    </div>
+
+    <div class="pages">
+      <a href="home.html">Home</a>
+      <a href="index.html">Products</a>
+      <a href="about.html">About</a>
+      <a href="user-auth.html">Login</a>
+      <a href="user-dashboard.html" class="active">Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="content">
+    
+    <section class="hero">
+      <h1>User Dashboard</h1>
+    </section>
+
+    <div class="dashboard-layout">
+
+      <!-- LEFT — LARGE DAYWISE (Milk only) -->
+      <div class="daywise-card">
+        <div class="dash-head">
+          <h3>Day-Wise Purchases (Milk only)</h3>
+          <div class="bill-controls">
+            <button id="dwPrev">Prev</button>
+            <span id="dwMonthName" class="pill"></span>
+            <button id="dwNext">Next</button>
+          </div>
+        </div>
+
+        <div class="daywise-split">
+          <div class="half">
+            <h4>Days 1–15</h4>
+            <table class="bill-table">
+              <thead>
+                <tr><th>Date</th><th>Item</th><th>Qty</th><th>Amount (₹)</th></tr>
+              </thead>
+              <tbody id="dayWiseData1"></tbody>
+            </table>
+          </div>
+
+          <div class="half">
+            <h4>Days 16–31</h4>
+            <table class="bill-table">
+              <thead>
+                <tr><th>Date</th><th>Item</th><th>Qty</th><th>Amount (₹)</th></tr>
+              </thead>
+              <tbody id="dayWiseData2"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="totals-row">
+          <span>Milk Month Total:</span>
+          <strong id="dwMonthTotal">₹0</strong>
+        </div>
+      </div>
+
+      <!-- RIGHT — STACKED CARDS -->
+      <div class="side-stack">
+
+        <!-- MONTHLY BILL (all items, grouped) -->
+        <div class="small-card">
+          <div class="dash-head">
+            <h3>Monthly Bills</h3>
+            <div class="bill-controls">
+              <button id="prev">Prev</button>
+              <span id="monthName" class="pill"></span>
+              <button id="next">Next</button>
+            </div>
+          </div>
+
+          <table class="bill-table">
+            <thead>
+              <tr><th>Item</th><th>Qty</th><th>Amount (₹)</th></tr>
+            </thead>
+            <tbody id="billData"></tbody>
+            <tfoot>
+              <tr class="tfoot">
+                <td colspan="2">Monthly Total</td>
+                <td id="billMonthTotal">₹0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- PAYMENT STATUS -->
+        <div class="small-card">
+          <div class="dash-head">
+            <h3>Payment Status</h3>
+            <p>Total Pending: <strong id="pendingValue">₹0</strong></p>
+          </div>
+
+          <table class="status-table">
+            <thead>
+              <tr><th>Month</th><th>Amount (₹)</th><th>Status</th></tr>
+            </thead>
+            <tbody id="payStatus"></tbody>
+          </table>
+        </div>
+
+        <!-- OTHER ITEMS (non-milk) -->
+        <div class="small-card">
+          <div class="dash-head">
+            <h3>Other Items (Non-Milk)</h3>
+            <span class="pill" id="otherItemsMonth"></span>
+          </div>
+          <table class="bill-table">
+            <thead>
+              <tr><th>Item</th><th>Qty</th><th>Amount (₹)</th></tr>
+            </thead>
+            <tbody id="otherItemsData"></tbody>
+            <tfoot>
+              <tr class="tfoot">
+                <td colspan="2">Other Items Total</td>
+                <td id="otherItemsTotal">₹0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FULL WIDTH PAY BAR -->
+    <div class="paybar">
+      <div class="pay-row">
+        <label>Select Month</label>
+        <select id="payMonth"></select>
+      </div>
+
+      <div class="pay-row">
+        <label>Select Date</label>
+        <input type="date" id="payDate">
+      </div>
+
+      <div class="pay-row">
+        <label>Amount (₹)</label>
+        <input type="number" id="payInput" placeholder="Enter amount">
+      </div>
+
+      <button id="payBtn" class="pay-btn">Pay</button>
+      <p id="payMsg" class="muted"></p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* -------------------------------------------
+   BASE MONTH NAMES
+------------------------------------------- */
+const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+/* -------------------------------------------
+   SEED DAYWISE (Jan–Mar) — includes non-milk items
+   (Display will filter Milk into day-wise tables.)
+------------------------------------------- */
+const dayWiseSeed = {
+  Jan: [
+    {date:"1 Jan", item:"Milk", qty:2, price:40},
+    {date:"2 Jan", item:"Curd", qty:1, price:30},
+    {date:"3 Jan", item:"Milk", qty:1, price:20},
+    {date:"4 Jan", item:"Paneer", qty:0.5, price:50},
+    {date:"5 Jan", item:"Butter", qty:0.25, price:60},
+    {date:"6 Jan", item:"Milk", qty:3, price:60},
+    {date:"7 Jan", item:"Curd", qty:2, price:60},
+    {date:"8 Jan", item:"Milk", qty:1, price:20},
+    {date:"9 Jan", item:"Paneer", qty:1, price:100},
+    {date:"10 Jan", item:"Milk", qty:2, price:40},
+    {date:"11 Jan", item:"Butter", qty:0.1, price:25},
+    {date:"12 Jan", item:"Curd", qty:1, price:30},
+    {date:"13 Jan", item:"Milk", qty:3, price:60},
+    {date:"14 Jan", item:"Paneer", qty:0.5, price:50},
+    {date:"15 Jan", item:"Milk", qty:1, price:20},
+    {date:"16 Jan", item:"Curd", qty:1, price:30},
+    {date:"17 Jan", item:"Milk", qty:2, price:40},
+    {date:"18 Jan", item:"Butter", qty:0.2, price:45},
+    {date:"19 Jan", item:"Milk", qty:3, price:60},
+    {date:"20 Jan", item:"Paneer", qty:0.3, price:30},
+    {date:"21 Jan", item:"Milk", qty:1, price:20},
+    {date:"22 Jan", item:"Curd", qty:1, price:30},
+    {date:"23 Jan", item:"Milk", qty:2, price:40},
+    {date:"24 Jan", item:"Paneer", qty:0.7, price:70},
+    {date:"25 Jan", item:"Butter", qty:0.15, price:35},
+    {date:"26 Jan", item:"Milk", qty:3, price:60},
+    {date:"27 Jan", item:"Curd", qty:1, price:30},
+    {date:"28 Jan", item:"Milk", qty:1, price:20},
+    {date:"29 Jan", item:"Paneer", qty:0.4, price:40},
+    {date:"30 Jan", item:"Milk", qty:2, price:40},
+    {date:"31 Jan", item:"Butter", qty:0.25, price:60}
+  ],
+  Feb: [
+    {date:"1 Feb", item:"Milk", qty:2, price:40},
+    {date:"2 Feb", item:"Curd", qty:1, price:30},
+    {date:"3 Feb", item:"Milk", qty:3, price:60},
+    {date:"4 Feb", item:"Milk", qty:3, price:60},
+    {date:"5 Feb", item:"Paneer", qty:0.6, price:60},
+    {date:"6 Feb", item:"Milk", qty:1, price:20},
+    {date:"7 Feb", item:"Butter", qty:0.2, price:45},
+    {date:"8 Feb", item:"Milk", qty:2, price:40},
+    {date:"9 Feb", item:"Paneer", qty:1, price:100},
+    {date:"10 Feb", item:"Curd", qty:1, price:30},
+    {date:"11 Feb", item:"Milk", qty:1, price:20},
+    {date:"12 Feb", item:"Milk", qty:3, price:60},
+    {date:"13 Feb", item:"Paneer", qty:0.8, price:80},
+    {date:"14 Feb", item:"Milk", qty:2, price:40},
+    {date:"15 Feb", item:"Curd", qty:1, price:30},
+    {date:"16 Feb", item:"Milk", qty:1, price:20},
+    {date:"17 Feb", item:"Milk", qty:2, price:40},
+    {date:"18 Feb", item:"Paneer", qty:0.5, price:50},
+    {date:"19 Feb", item:"Butter", qty:0.2, price:45},
+    {date:"20 Feb", item:"Milk", qty:1, price:20},
+    {date:"21 Feb", item:"Curd", qty:1, price:30},
+    {date:"22 Feb", item:"Milk", qty:3, price:60},
+    {date:"23 Feb", item:"Paneer", qty:0.3, price:30},
+    {date:"24 Feb", item:"Milk", qty:2, price:40},
+    {date:"25 Feb", item:"Butter", qty:0.25, price:60},
+    {date:"26 Feb", item:"Milk", qty:3, price:60},
+    {date:"27 Feb", item:"Curd", qty:1, price:30},
+    {date:"28 Feb", item:"Milk", qty:1, price:20},
+    {date:"29 Feb", item:"Paneer", qty:0.5, price:50},
+    {date:"30 Feb", item:"Milk", qty:2, price:40},
+    {date:"31 Feb", item:"Butter", qty:0.2, price:45}
+  ],
+  Mar: [
+    {date:"1 Mar", item:"Milk", qty:2, price:40},
+    {date:"2 Mar", item:"Curd", qty:1, price:30},
+    {date:"3 Mar", item:"Milk", qty:1, price:20},
+    {date:"4 Mar", item:"Paneer", qty:0.5, price:50},
+    {date:"5 Mar", item:"Butter", qty:0.25, price:60},
+    {date:"6 Mar", item:"Milk", qty:3, price:60},
+    {date:"7 Mar", item:"Curd", qty:2, price:60},
+    {date:"8 Mar", item:"Milk", qty:1, price:20},
+    {date:"9 Mar", item:"Paneer", qty:1, price:100},
+    {date:"10 Mar", item:"Milk", qty:2, price:40},
+    {date:"11 Mar", item:"Butter", qty:0.1, price:25},
+    {date:"12 Mar", item:"Curd", qty:1, price:30},
+    {date:"13 Mar", item:"Milk", qty:3, price:60},
+    {date:"14 Mar", item:"Paneer", qty:0.5, price:50},
+    {date:"15 Mar", item:"Milk", qty:1, price:20},
+    {date:"16 Mar", item:"Curd", qty:1, price:30},
+    {date:"17 Mar", item:"Milk", qty:2, price:40},
+    {date:"18 Mar", item:"Butter", qty:0.2, price:45},
+    {date:"19 Mar", item:"Milk", qty:3, price:60},
+    {date:"20 Mar", item:"Paneer", qty:0.3, price:30},
+    {date:"21 Mar", item:"Milk", qty:1, price:20},
+    {date:"22 Mar", item:"Curd", qty:1, price:30},
+    {date:"23 Mar", item:"Milk", qty:2, price:40},
+    {date:"24 Mar", item:"Paneer", qty:0.7, price:70},
+    {date:"25 Mar", item:"Butter", qty:0.15, price:35},
+    {date:"26 Mar", item:"Milk", qty:3, price:60},
+    {date:"27 Mar", item:"Curd", qty:1, price:30},
+    {date:"28 Mar", item:"Milk", qty:1, price:20},
+    {date:"29 Mar", item:"Paneer", qty:0.4, price:40},
+    {date:"30 Mar", item:"Milk", qty:2, price:40},
+    {date:"31 Mar", item:"Butter", qty:0.25, price:60}
+  ]
+};
+
+/* -------------------------------------------
+   GENERATE Apr–Dec (31 entries each)
+------------------------------------------- */
+function generateMonth(name, seed) {
+  const items = [
+    {item:"Milk",   price:20,  qty:[1,2,3]},
+    {item:"Curd",   price:30,  qty:[1,1,2]},
+    {item:"Paneer", price:100, qty:[0.3,0.5,1]},
+    {item:"Butter", price:60,  qty:[0.1,0.2,0.25]}
+  ];
+  const out = [];
+  for (let d=1; d<=31; d++) {
+    const pick = (seed + d) % items.length;
+    const I = items[pick];
+    const q = I.qty[(seed + d) % I.qty.length];
+    out.push({
+      date: `${d} ${name}`,
+      item: I.item,
+      qty: q,
+      price: Math.round(I.price * q)
+    });
+  }
+  return out;
+}
+
+/* -------------------------------------------
+   MERGE ALL 12 MONTHS
+------------------------------------------- */
+const dayWise = {};
+months.forEach((m,i)=>{
+  dayWise[m] = dayWiseSeed[m] ? dayWiseSeed[m] : generateMonth(m, i+9);
+});
+
+/* -------------------------------------------
+   CALC HELPERS
+------------------------------------------- */
+function sumMonthAmount(m){
+  return dayWise[m].reduce((s,r)=>s + Number(r.price),0);
+}
+function sumMonthMilkAmount(m){
+  return dayWise[m].filter(r=>r.item==="Milk")
+                   .reduce((s,r)=>s + Number(r.price),0);
+}
+function groupMonthlyBill(m){
+  const map = new Map();
+  dayWise[m].forEach(r=>{
+    if(!map.has(r.item)) map.set(r.item,{item:r.item,qty:0,amount:0});
+    const x = map.get(r.item);
+    x.qty += Number(r.qty);
+    x.amount += Number(r.price);
+  });
+  return [...map.values()].map(x=>({
+    item:x.item,
+    qty:Math.round(x.qty*100)/100,
+    amount:Math.round(x.amount)
+  }));
+}
+function groupOtherItems(m){
+  const map = new Map();
+  dayWise[m].forEach(r=>{
+    if(r.item==="Milk") return;
+    if(!map.has(r.item)) map.set(r.item,{item:r.item,qty:0,amount:0});
+    const x = map.get(r.item);
+    x.qty += Number(r.qty);
+    x.amount += Number(r.price);
+  });
+  return [...map.values()].map(x=>({
+    item:x.item,
+    qty:Math.round(x.qty*100)/100,
+    amount:Math.round(x.amount)
+  }));
+}
+
+/* -------------------------------------------
+   PAYMENT STATE (auto-calculated from full data)
+------------------------------------------- */
+const payments = {};
+months.forEach(m=>{
+  payments[m] = {amount:sumMonthAmount(m), status:"Pending"};
+});
+
+/* -------------------------------------------
+   RENDER FUNCTIONS
+------------------------------------------- */
+let billIndex = 0;
+let dayIndex = 0;
+
+function renderDaywise(){
+  const m = months[dayIndex];
+  document.getElementById("dwMonthName").textContent = m;
+
+  const milkOnly = dayWise[m].filter(d=>d.item==="Milk");
+
+  const firstHalf = milkOnly.filter(d=>{
+    const n = parseInt(d.date,10);
+    return n>=1 && n<=15;
+  });
+  const secondHalf = milkOnly.filter(d=>{
+    const n = parseInt(d.date,10);
+    return n>=16 && n<=31;
+  });
+
+  const rows1 = firstHalf.map(d=>`
+    <tr><td>${d.date}</td><td>${d.item}</td><td>${d.qty}</td><td>${d.price}</td></tr>
+  `).join("");
+  const rows2 = secondHalf.map(d=>`
+    <tr><td>${d.date}</td><td>${d.item}</td><td>${d.qty}</td><td>${d.price}</td></tr>
+  `).join("");
+
+  document.getElementById("dayWiseData1").innerHTML = rows1 || `<tr><td colspan="4" class="muted">No milk entries for days 1–15.</td></tr>`;
+  document.getElementById("dayWiseData2").innerHTML = rows2 || `<tr><td colspan="4" class="muted">No milk entries for days 16–31.</td></tr>`;
+
+  document.getElementById("dwMonthTotal").textContent = "₹" + sumMonthMilkAmount(m);
+
+  // Sync "Other Items" with same month
+  renderOtherItems(m);
+}
+
+function renderBill(){
+  const m = months[billIndex];
+  document.getElementById("monthName").textContent = m;
+
+  const rows = groupMonthlyBill(m)
+    .map(b=>`
+      <tr>
+        <td>${b.item}</td>
+        <td>${b.qty}</td>
+        <td>${b.amount}</td>
+      </tr>
+    `).join("");
+
+  document.getElementById("billData").innerHTML = rows;
+  document.getElementById("billMonthTotal").textContent = "₹" + sumMonthAmount(m);
+}
+
+function renderPaymentStatus(){
+  const rows = months.map(m=>{
+    const p = payments[m];
+    return `
+      <tr>
+        <td>${m}</td>
+        <td>₹${p.amount}</td>
+        <td>${p.status}</td>
+      </tr>
+    `;
+  }).join("");
+
+  document.getElementById("payStatus").innerHTML = rows;
+
+  const total = Object.values(payments)
+    .filter(p=>p.status==="Pending")
+    .reduce((s,p)=>s + p.amount, 0);
+
+  document.getElementById("pendingValue").textContent = "₹" + total;
+
+  document.getElementById("payMonth").innerHTML =
+    months.map(m=>`<option value="${m}">${m}</option>`).join("");
+}
+
+function renderOtherItems(monthLabel){
+  const m = monthLabel || months[dayIndex];
+  document.getElementById("otherItemsMonth").textContent = m;
+
+  const data = groupOtherItems(m);
+  const body = document.getElementById("otherItemsData");
+  if (data.length === 0) {
+    body.innerHTML = `<tr><td colspan="3" class="muted">No non-milk items this month.</td></tr>`;
+    document.getElementById("otherItemsTotal").textContent = "₹0";
+    return;
+  }
+  body.innerHTML = data.map(x => `
+    <tr>
+      <td>${x.item}</td>
+      <td>${x.qty}</td>
+      <td>${x.amount}</td>
+    </tr>
+  `).join("");
+
+  const total = data.reduce((s,x)=>s + x.amount, 0);
+  document.getElementById("otherItemsTotal").textContent = "₹" + total;
+}
+
+/* -------------------------------------------
+   EVENTS
+------------------------------------------- */
+document.getElementById("dwPrev").onclick = ()=>{
+  if(dayIndex > 0) dayIndex--;
+  renderDaywise();
+};
+document.getElementById("dwNext").onclick = ()=>{
+  if(dayIndex < months.length-1) dayIndex++;
+  renderDaywise();
+};
+
+document.getElementById("prev").onclick = ()=>{
+  if(billIndex > 0) billIndex--;
+  renderBill();
+};
+document.getElementById("next").onclick = ()=>{
+  if(billIndex < months.length-1) billIndex++;
+  renderBill();
+};
+
+document.getElementById("payBtn").onclick = ()=>{
+  const m = document.getElementById("payMonth").value;
+  const amt = Number(document.getElementById("payInput").value);
+  const msg = document.getElementById("payMsg");
+  msg.textContent = "";
+
+  if(!amt || amt<=0){
+    msg.textContent = "Enter a valid amount.";
+    return;
+  }
+
+  const p = payments[m];
+  if(amt >= p.amount){
+    p.amount = 0;
+    p.status = "Paid";
+    msg.textContent = `${m} is now fully paid.`;
+  } else {
+    p.amount -= amt;
+    p.status = "Pending";
+    msg.textContent = `Paid ₹${amt}. Remaining: ₹${p.amount}`;
+  }
+
+  renderPaymentStatus();
+  renderBill();
+  renderDaywise();
+  document.getElementById("payInput").value = "";
+};
+
+/* -------------------------------------------
+   INITIAL RENDER
+------------------------------------------- */
+renderDaywise();
+renderBill();
+renderPaymentStatus();
+</script>
+
+</body>
+</html>

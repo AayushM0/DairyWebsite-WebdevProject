@@ -1,0 +1,179 @@
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* equal width columns */
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* LEFT LARGE CARD */
+.daywise-card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+}
+
+.daywise-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* split 1–15 and 16–31 */
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.daywise-card h4 {
+  margin: 6px 0 8px 0;
+  color: #2e7d32;
+}
+
+.totals-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+  margin-top: 8px;
+}
+
+/* RIGHT STACK */
+.side-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Small cards right side */
+.small-card {
+  background: white;
+  padding: 16px;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+
+/* Head */
+.dash-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Tables */
+.bill-table, .status-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bill-table th, .bill-table td,
+.status-table th, .status-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.bill-table thead th,
+.status-table thead th {
+  background: #f1fff4;
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.tfoot td {
+  font-weight: bold;
+}
+
+/* Buttons / pills */
+.pill {
+  padding: 5px 12px;
+  border-radius: 30px;
+  background: #e6fbe7;
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.bill-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bill-controls button {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* PAY BAR */
+.paybar {
+  margin-top: 25px;
+  display: flex;
+  background: white;
+  padding: 16px;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pay-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+}
+
+.pay-row label {
+  font-weight: bold;
+  color: #333;
+}
+
+#payMonth, #payDate, #payInput {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.pay-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.muted {
+  color: #666;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+  .daywise-split {
+    grid-template-columns: 1fr; /* stack halves on small screens */
+  }
+  .paybar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

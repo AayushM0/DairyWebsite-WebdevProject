@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dairy</title>
+    <link rel="icon" href="./images/dairy2.jpg">
+    <link rel="stylesheet" href="./styles.css">
+
+</head>
+<body>
+    <div class="website-container">
+        <div class="page-handler">
+            <div class="shopname">
+                <img src="./images/dairy.webp" alt="" class="shoplogo">
+                <h3>DairyShop</h3>
+            </div> 
+            <div class="pages">
+                <a href="home.html" class="home">Home</a>
+                <a href="index.html" class="about">Products</a>
+                <a href="about.html" class="about">About</a>
+                        <a href="user-auth.html">Login</a>
+        <a href="user-dashboard.html">Dashboard</a>
+            </div>
+        </div>
+        <div class="content">
+            <section class="hero">
+            <h1>Inventory</h1>
+            </section>
+            <section class="products">
+                <header class="Heading-container">
+                    <h4>Products</h4>
+                
+                    <input  id="search" type="text">
+                    <button class="search-button">Search</button>
+                </header>
+                <div class="productsData">
+                    <div class="dairyImages">
+                        
+                    </div>
+                    <div class="card">
+                        <img class="product-image" src="./images/milk2.jpg" alt="">
+                        <div class="product-details">
+                            <h3>Milk</h3>
+                            <p>Price - 40</p>
+                        </div>
+                        <button>Add</button>
+                    </div>
+                    <div class="card">
+                        <img class="product-image" src="./images/swiss.jpg" alt="">
+                        <div class="product-details">
+                            <h3>cheese</h3>
+                            <p>Price - 200</p>
+                        </div>
+                        <button id="addbutton">Add</button>
+                    </div>
+                    <div class="card">
+                        <img class="product-image" src="./images/NCI_butter.jpg" alt="">
+                        <div class="product-details">
+                            <h3>butter</h3>
+                            <p>Price - 70</p>
+                        </div>
+                        <button id="addbutton">Add</button>
+                    </div>
+                    <div class="card">
+                        <img class="product-image" src="./images/2_Curd.jpg" alt="">
+                        <div class="product-details">
+                            <h3>curd</h3>
+                            <p>Price - 30</p>
+                        </div>
+                        <button id="addbutton">Add</button>
+                    </div>
+                    <div class="card">
+                        <img class="product-image" src="./images/paneer.jpg" alt="">
+                        <div class="product-details">
+                            <h3>paneer</h3>
+                            <p>Price - 100</p>
+                        </div>
+                        <button id="addbutton">Add</button>
+                    </div>
+                    
+
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+    <script>
+        const searchInput = document.getElementById("search");
+        const searchButton = document.querySelector(".search-button");
+        const cards = document.querySelectorAll(".card");
+
+    function filterData() {
+        const input = searchInput.value.toLowerCase();
+
+        cards.forEach((card) => {
+            const productName = card.querySelector(".product-details h3").textContent.toLowerCase();
+
+            if (productName.includes(input)) {
+                card.style.display = "flex";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+
+    searchButton.addEventListener("click", filterData);
+    </script>
+</html>
